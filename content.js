@@ -22,13 +22,13 @@ if (!document.getElementById("__pink_utc_clock_root__")) {
   box.style.fontSize = "12px";
   box.style.lineHeight = "1";
   box.style.color = "#2a2a2a";
-  box.style.background = "#ffc0cb";           // pink
+  box.style.background = "rgba(255,192,203,0.35)"; 
   box.style.border = "1px solid rgba(0,0,0,.08)";
   box.style.borderRadius = "999px";
   box.style.padding = "6px 10px";
   box.style.boxShadow = "0 2px 10px rgba(0,0,0,.10)";
   box.style.userSelect = "none";
-  box.style.opacity = "0.95";
+  box.style.opacity = "1";
   box.style.display = "flex";
   box.style.alignItems = "center";
   box.style.gap = "6px";
