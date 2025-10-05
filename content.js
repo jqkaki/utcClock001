@@ -124,7 +124,7 @@ if (!document.getElementById("__pink_utc_clock_root__")) {
     host.style.right = "auto";
     host.style.bottom = "auto";
 
-    window.addEventListener("mousemove", onMouseMove, { passive: true });
+    window.addEventListener("mousemove", onMouseMove, { passive: false });
     window.addEventListener("mouseup", endDrag, { passive: true, once: true });
 
     window.addEventListener("touchmove", onTouchMove, { passive: false });
@@ -133,7 +133,7 @@ if (!document.getElementById("__pink_utc_clock_root__")) {
 
   function onMouseMove(e) {
     if (!dragging) return;
-    e.preventDefault();
+    if (e.cancelable) e.preventDefault(); 
     moveTo(e.clientX, e.clientY);
   }
   function onTouchMove(e) {
