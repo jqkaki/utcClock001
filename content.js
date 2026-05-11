@@ -7,6 +7,7 @@ if (!document.getElementById("__pink_utc_clock_root__")) {
     "Australia/Sydney",
   ];
   const AUTO_RESET_MS = 10 * 60 * 1000;
+  const HIDE_AUTO_RESTORE_MS = 5 * 60 * 1000;
 
   const host = document.createElement("div");
   host.id = "__pink_utc_clock_root__";
@@ -128,11 +129,45 @@ if (!document.getElementById("__pink_utc_clock_root__")) {
   timeEl.textContent = "--:--:--";
   timeEl.style.pointerEvents = "none";
 
-  box.append(peanutGlow, topSheen, dot, tzSelect, timeEl);
-  shadow.appendChild(box);
+  const hideBtn = document.createElement("button");
+  hideBtn.type = "button";
+  hideBtn.setAttribute("aria-label", "Minimize clock");
+  hideBtn.textContent = "–";
+  hideBtn.style.pointerEvents = "auto";
+  hideBtn.style.width = "16px";
+  hideBtn.style.height = "16px";
+  hideBtn.style.borderRadius = "999px";
+  hideBtn.style.border = "1px solid rgba(255,182,213,0.7)";
+  hideBtn.style.background = "rgba(255,255,255,0.14)";
+  hideBtn.style.color = "#ffffff";
+  hideBtn.style.font = "600 12px/1 monospace";
+  hideBtn.style.cursor = "pointer";
+  hideBtn.style.padding = "0";
+  hideBtn.style.margin = "0";
+  hideBtn.style.transform = "translateY(-0.5px)";
+
+  const bobble = document.createElement("button");
+  bobble.type = "button";
+  bobble.setAttribute("aria-label", "Show clock");
+  bobble.style.display = "none";
+  bobble.style.pointerEvents = "auto";
+  bobble.style.width = "14px";
+  bobble.style.height = "14px";
+  bobble.style.borderRadius = "50%";
+  bobble.style.border = "1px solid rgba(255,162,208,0.92)";
+  bobble.style.background = "linear-gradient(180deg, rgba(255,154,203,0.97), rgba(255,86,169,0.92))";
+  bobble.style.boxShadow = "inset 0 1px 0 rgba(255,255,255,0.56), 0 1px 4px rgba(255,72,158,0.42)";
+  bobble.style.cursor = "pointer";
+  bobble.style.padding = "0";
+  bobble.style.margin = "0";
+
+  box.append(peanutGlow, topSheen, dot, tzSelect, timeEl, hideBtn);
+  shadow.append(box, bobble);
 
   let currentTimeZone = "UTC";
   let autoResetTimer = null;
+  let hideRestoreTimer = null;
+  let isHidden = false;
   const formatterByZone = new Map();
 
   function getFormatter(timeZone) {
@@ -167,6 +202,33 @@ if (!document.getElementById("__pink_utc_clock_root__")) {
       clearTimeout(autoResetTimer);
       autoResetTimer = null;
     }
+  }
+  function clearHideRestoreTimer() {
+    if (hideRestoreTimer !== null) {
+      clearTimeout(hideRestoreTimer);
+      hideRestoreTimer = null;
+    }
+  }
+
+  function showClock() {
+    if (!isHidden) return;
+    isHidden = false;
+    clearHideRestoreTimer();
+    box.style.display = "flex";
+    bobble.style.display = "none";
+    setTimeout(disablePE, 0);
+  }
+
+  function hideClock() {
+    if (isHidden) return;
+    isHidden = true;
+    clearHideRestoreTimer();
+    box.style.display = "none";
+    bobble.style.display = "inline-block";
+    host.style.pointerEvents = "auto";
+    hideRestoreTimer = setTimeout(() => {
+      showClock();
+    }, HIDE_AUTO_RESTORE_MS);
   }
 
   function setTimeZone(nextZone, shouldRestartResetTimer) {
@@ -222,6 +284,7 @@ if (!document.getElementById("__pink_utc_clock_root__")) {
   window.addEventListener("pagehide", () => {
     clearInterval(timer);
     clearAutoResetTimer();
+    clearHideRestoreTimer();
     clearTimeout(peTimer);
   });
 
@@ -234,6 +297,7 @@ if (!document.getElementById("__pink_utc_clock_root__")) {
     box.style.pointerEvents = "auto";
   }
   function disablePE() {
+    if (isHidden) return;
     if (!dragging) {
       host.style.pointerEvents = "none";
       box.style.pointerEvents = "none";
@@ -327,6 +391,7 @@ if (!document.getElementById("__pink_utc_clock_root__")) {
 
   let peTimer;
   window.addEventListener("mousemove", (e) => {
+    if (isHidden) return;
     if (dragging) return;
     const r = host.getBoundingClientRect();
     const near = (
@@ -346,5 +411,16 @@ if (!document.getElementById("__pink_utc_clock_root__")) {
     host.style.left = "auto";
     host.style.top = "auto";
     try { localStorage.removeItem("__pink_utc_clock_pos__"); } catch {}
+  });
+
+  hideBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    hideClock();
+  });
+  bobble.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    showClock();
   });
 }
