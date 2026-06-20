@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "UTC Clock",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "description": "A tiny pink UTC clock.",
   "icons": {
     "16": "pclock.png",
